@@ -23,14 +23,13 @@
 
 package dev.architectury.loom.forgeruntime.mixin;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.IncompatibleEnvironmentException;
+
+import java.nio.file.Path;
+import java.util.*;
 
 public class ForgeLoomMixinRemapperInjectorService implements ITransformationService {
 	@Override
@@ -42,8 +41,7 @@ public class ForgeLoomMixinRemapperInjectorService implements ITransformationSer
 	public void initialize(IEnvironment environment) {
 	}
 
-	@Override
-	public void beginScanning(IEnvironment environment) {
+	public void attach() {
 		try {
 			// Call via reflection so it doesn't crash if mixin doesn't exist at all
 			Class.forName("dev.architectury.loom.forgeruntime.mixin.ForgeLoomMixinRemapperInjectorServiceImpl").getDeclaredMethod("attach")
@@ -51,6 +49,18 @@ public class ForgeLoomMixinRemapperInjectorService implements ITransformationSer
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+	}
+
+	// ML 6
+	public List<Map.Entry<String, Path>> runScan(IEnvironment environment) {
+		attach();
+		return new ArrayList<>();
+	}
+
+	// ML 9
+	public List beginScanning(IEnvironment environment) {
+		attach();
+		return new ArrayList<>();
 	}
 
 	@Override

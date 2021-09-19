@@ -23,6 +23,10 @@
 
 package dev.architectury.loom.forgeruntime;
 
+import cpw.mods.modlauncher.api.INameMappingService;
+import net.fabricmc.mapping.tree.TinyMappingFactory;
+import net.fabricmc.mapping.tree.TinyTree;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -34,11 +38,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
-
-import cpw.mods.modlauncher.api.INameMappingService;
-
-import net.fabricmc.mapping.tree.TinyMappingFactory;
-import net.fabricmc.mapping.tree.TinyTree;
 
 public class YarnNamingService implements INameMappingService {
 	private static final String PATH_TO_MAPPINGS = "fabric.yarnWithSrg.path";
@@ -86,27 +85,27 @@ public class YarnNamingService implements INameMappingService {
 		TinyTree mappings = getMappings();
 
 		switch (domain) {
-		case CLASS:
-			boolean dot = name.contains(".");
-			return find(mappings.getClasses(), def -> maybeReplace(dot, def.getName("srg"), '/', '.').equals(name))
-					.map(def -> maybeReplace(dot, def.getName("named"), '/', '.'))
-					.orElse(name);
-		case METHOD:
-			return mappings.getClasses().stream()
-					.flatMap(def -> def.getMethods().stream())
-					.filter(def -> def.getName("srg").equals(name))
-					.findAny()
-					.map(def -> def.getName("named"))
-					.orElse(name);
-		case FIELD:
-			return mappings.getClasses().stream()
-					.flatMap(def -> def.getFields().stream())
-					.filter(def -> def.getName("srg").equals(name))
-					.findAny()
-					.map(def -> def.getName("named"))
-					.orElse(name);
-		default:
-			return name;
+			case CLASS:
+				boolean dot = name.contains(".");
+				return find(mappings.getClasses(), def -> maybeReplace(dot, def.getName("srg"), '/', '.').equals(name))
+						.map(def -> maybeReplace(dot, def.getName("named"), '/', '.'))
+						.orElse(name);
+			case METHOD:
+				return mappings.getClasses().stream()
+						.flatMap(def -> def.getMethods().stream())
+						.filter(def -> def.getName("srg").equals(name))
+						.findAny()
+						.map(def -> def.getName("named"))
+						.orElse(name);
+			case FIELD:
+				return mappings.getClasses().stream()
+						.flatMap(def -> def.getFields().stream())
+						.filter(def -> def.getName("srg").equals(name))
+						.findAny()
+						.map(def -> def.getName("named"))
+						.orElse(name);
+			default:
+				return name;
 		}
 	}
 

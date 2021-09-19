@@ -16,20 +16,13 @@
 
 package dev.architectury.loom.forgeruntime.mixin;
 
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-
-import org.spongepowered.asm.mixin.transformer.ClassInfo;
-
 import net.fabricmc.mapping.tree.ClassDef;
 import net.fabricmc.mapping.tree.Descriptored;
 import net.fabricmc.mapping.tree.TinyTree;
 import net.fabricmc.mapping.util.MixinRemapper;
+import org.spongepowered.asm.mixin.transformer.ClassInfo;
+
+import java.util.*;
 
 public class MixinIntermediaryDevRemapper extends MixinRemapper {
 	private static final String ambiguousName = "<ambiguous>"; // dummy value for ambiguous mappings - needs querying with additional owner and/or desc info
