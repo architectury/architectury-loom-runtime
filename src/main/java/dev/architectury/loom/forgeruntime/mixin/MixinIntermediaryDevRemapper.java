@@ -16,13 +16,20 @@
 
 package dev.architectury.loom.forgeruntime.mixin;
 
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+
+import org.spongepowered.asm.mixin.transformer.ClassInfo;
+
 import net.fabricmc.mapping.tree.ClassDef;
 import net.fabricmc.mapping.tree.Descriptored;
 import net.fabricmc.mapping.tree.TinyTree;
 import net.fabricmc.mapping.util.MixinRemapper;
-import org.spongepowered.asm.mixin.transformer.ClassInfo;
-
-import java.util.*;
 
 public class MixinIntermediaryDevRemapper extends MixinRemapper {
 	private static final String ambiguousName = "<ambiguous>"; // dummy value for ambiguous mappings - needs querying with additional owner and/or desc info
@@ -131,27 +138,31 @@ public class MixinIntermediaryDevRemapper extends MixinRemapper {
 			}
 		}
 
-		Queue<ClassInfo> classInfos = new ArrayDeque<>();
-		classInfos.add(ClassInfo.forName(owner));
+		ClassInfo classInfo = ClassInfo.forName(owner);
 
-		while (!classInfos.isEmpty()) {
-			ClassInfo c = classInfos.remove();
-			String ownerO = unmap(c.getName());
+		if (classInfo == null) { // unknown class?
+			return name;
+		}
+
+		Queue<ClassInfo> queue = new ArrayDeque<>();
+
+		do {
+			String ownerO = unmap(classInfo.getName());
 			String s;
 
 			if (!(s = mapMethodNameInner(ownerO, name, desc)).equals(name)) {
 				return s;
 			}
 
-			if (!c.getSuperName().startsWith("java/")) {
-				ClassInfo cSuper = c.getSuperClass();
+			if (!classInfo.getSuperName().startsWith("java/")) {
+				ClassInfo cSuper = classInfo.getSuperClass();
 
 				if (cSuper != null) {
-					classInfos.add(cSuper);
+					queue.add(cSuper);
 				}
 			}
 
-			for (String itf : c.getInterfaces()) {
+			for (String itf : classInfo.getInterfaces()) {
 				if (itf.startsWith("java/")) {
 					continue;
 				}
@@ -159,10 +170,10 @@ public class MixinIntermediaryDevRemapper extends MixinRemapper {
 				ClassInfo cItf = ClassInfo.forName(itf);
 
 				if (cItf != null) {
-					classInfos.add(cItf);
+					queue.add(cItf);
 				}
 			}
-		}
+		} while ((classInfo = queue.poll()) != null);
 
 		return name;
 	}
@@ -204,9 +215,9 @@ public class MixinIntermediaryDevRemapper extends MixinRemapper {
 
 		while (c != null) {
 			String nextOwner = unmap(c.getName());
-			String s;
+			String s = mapFieldNameInner(nextOwner, name, desc);
 
-			if (!(s = mapFieldNameInner(nextOwner, name, desc)).equals(name)) {
+			if (!s.equals(name)) {
 				return s;
 			}
 
