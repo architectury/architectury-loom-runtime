@@ -24,8 +24,7 @@
 package dev.architectury.loom.forgeruntime;
 
 import cpw.mods.modlauncher.api.INameMappingService;
-import net.fabricmc.mapping.tree.TinyMappingFactory;
-import net.fabricmc.mapping.tree.TinyTree;
+import net.fabricmc.mapping.tree.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,15 +32,13 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Predicate;
+import java.util.function.Consumer;
 
 public class YarnNamingService implements INameMappingService {
 	private static final String PATH_TO_MAPPINGS = "fabric.yarnWithSrg.path";
-	private TinyTree mappings = null;
+	private Map<String, String> classNameMappings = null, methodNameMappings = null, fieldNameMappings = null;
 
 	@Override
 	public String mappingName() {
@@ -63,61 +60,57 @@ public class YarnNamingService implements INameMappingService {
 		return this::remap;
 	}
 
-	private TinyTree getMappings() {
-		if (mappings != null) {
-			return mappings;
+	private void generateMappings() {
+		if (classNameMappings != null) {
+			return;
 		}
 
 		String pathStr = System.getProperty(PATH_TO_MAPPINGS);
 		if (pathStr == null) throw new RuntimeException("Missing system property '" + PATH_TO_MAPPINGS + "'!");
 		Path path = Paths.get(pathStr);
 
+		TinyTree mappings;
 		try (BufferedReader reader = Files.newBufferedReader(path)) {
 			mappings = TinyMappingFactory.loadWithDetection(reader);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
 
-		return mappings;
+		classNameMappings = new HashMap<>();
+		fieldNameMappings = new HashMap<>();
+		methodNameMappings = new HashMap<>();
+		buildNameMap(mappings.getClasses(), "srg", "named", classNameMappings, clz -> {
+			buildNameMap(clz.getMethods(), "srg", "named", methodNameMappings, null);
+			buildNameMap(clz.getFields(), "srg", "named", fieldNameMappings, null);
+		});
+	}
+
+	private <M extends Mapped> void buildNameMap(Collection<M> entries, String namespaceIn, String namespaceOut,
+							  Map<String, String> map, Consumer<M> entryConsumer) {
+		for(M entry : entries) {
+			map.put(entry.getName(namespaceIn), entry.getName(namespaceOut));
+			if(entryConsumer != null)
+				entryConsumer.accept(entry);
+		}
 	}
 
 	private String remap(Domain domain, String name) {
-		TinyTree mappings = getMappings();
+		/* ensure the mapping tables are built */
+		generateMappings();
 
 		switch (domain) {
 			case CLASS:
 				boolean dot = name.contains(".");
-				return find(mappings.getClasses(), def -> maybeReplace(dot, def.getName("srg"), '/', '.').equals(name))
-						.map(def -> maybeReplace(dot, def.getName("named"), '/', '.'))
-						.orElse(name);
+				String searchName = maybeReplace(dot, name, '.', '/');
+				String target = classNameMappings.get(searchName);
+				return target != null ? maybeReplace(dot, target, '/', '.') : name;
 			case METHOD:
-				return mappings.getClasses().stream()
-						.flatMap(def -> def.getMethods().stream())
-						.filter(def -> def.getName("srg").equals(name))
-						.findAny()
-						.map(def -> def.getName("named"))
-						.orElse(name);
+				return methodNameMappings.getOrDefault(name, name);
 			case FIELD:
-				return mappings.getClasses().stream()
-						.flatMap(def -> def.getFields().stream())
-						.filter(def -> def.getName("srg").equals(name))
-						.findAny()
-						.map(def -> def.getName("named"))
-						.orElse(name);
+				return fieldNameMappings.getOrDefault(name, name);
 			default:
 				return name;
 		}
-	}
-
-	// From CollectionUtil
-	private static <E> Optional<E> find(Iterable<? extends E> collection, Predicate<? super E> filter) {
-		for (E e : collection) {
-			if (filter.test(e)) {
-				return Optional.of(e);
-			}
-		}
-
-		return Optional.empty();
 	}
 
 	private static String maybeReplace(boolean run, String s, char from, char to) {
