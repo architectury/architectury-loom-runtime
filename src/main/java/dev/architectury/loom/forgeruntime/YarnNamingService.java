@@ -79,23 +79,27 @@ public class YarnNamingService implements INameMappingService {
 		classNameMappings = new HashMap<>();
 		fieldNameMappings = new HashMap<>();
 		methodNameMappings = new HashMap<>();
-		buildNameMap(mappings.getClasses(), "srg", "named", classNameMappings, clz -> {
-			buildNameMap(clz.getMethods(), "srg", "named", methodNameMappings, null);
-			buildNameMap(clz.getFields(), "srg", "named", fieldNameMappings, null);
+		buildNameMap(mappings.getClasses(), classNameMappings, clz -> {
+			buildNameMap(clz.getMethods(), methodNameMappings, null);
+			buildNameMap(clz.getFields(), fieldNameMappings, null);
 		});
 	}
 
-	private <M extends Mapped> void buildNameMap(Collection<M> entries, String namespaceIn, String namespaceOut,
-							  Map<String, String> map, Consumer<M> entryConsumer) {
-		for(M entry : entries) {
-			map.put(entry.getName(namespaceIn), entry.getName(namespaceOut));
-			if(entryConsumer != null)
+	private <M extends Mapped> void buildNameMap(Collection<M> entries, Map<String, String> target, Consumer<M> entryConsumer) {
+		final Map.Entry<String, String> understanding = understanding();
+		final String sourceNamespace = understanding.getKey();
+		final String targetNamespace = understanding.getValue();
+
+		for (M entry : entries) {
+			target.put(entry.getName(sourceNamespace), entry.getName(targetNamespace));
+			if (entryConsumer != null) {
 				entryConsumer.accept(entry);
+			}
 		}
 	}
 
 	private String remap(Domain domain, String name) {
-		/* ensure the mapping tables are built */
+		// ensure the mapping tables are built
 		generateMappings();
 
 		switch (domain) {
