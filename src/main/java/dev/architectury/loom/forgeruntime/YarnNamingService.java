@@ -42,7 +42,10 @@ public class YarnNamingService implements INameMappingService {
 	private static final String TARGET_NAMESPACE = "named";
 
 	private static final String PATH_TO_MAPPINGS = "fabric.yarnWithSrg.path";
-	private Map<String, String> classNameMappings = null, methodNameMappings = null, fieldNameMappings = null;
+
+	private Map<String, String> classNameMappings = null;
+	private Map<String, String> methodNameMappings = null;
+	private Map<String, String> fieldNameMappings = null;
 
 	@Override
 	public String mappingName() {
