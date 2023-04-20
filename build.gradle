@@ -72,6 +72,10 @@ shadowJar {
     relocate "net.fabricmc.mappings", "dev.architectury.loom.forgeruntime.shadow.mappings"
     configurations = [project.configurations.include]
     archiveClassifier = ""
+
+    manifest {
+        attributes 'Automatic-Module-Name': 'dev.architectury.loom.runtime'
+    }
 }
 
 assemble.dependsOn shadowJar
