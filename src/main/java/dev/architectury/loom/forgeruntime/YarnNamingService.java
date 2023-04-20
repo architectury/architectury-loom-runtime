@@ -37,6 +37,10 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class YarnNamingService implements INameMappingService {
+	// Namespaces in mapping file
+	private static final String SOURCE_NAMESPACE = "srg";
+	private static final String TARGET_NAMESPACE = "named";
+
 	private static final String PATH_TO_MAPPINGS = "fabric.yarnWithSrg.path";
 	private Map<String, String> classNameMappings = null, methodNameMappings = null, fieldNameMappings = null;
 
@@ -86,12 +90,8 @@ public class YarnNamingService implements INameMappingService {
 	}
 
 	private <M extends Mapped> void buildNameMap(Collection<M> entries, Map<String, String> target, Consumer<M> entryConsumer) {
-		final Map.Entry<String, String> understanding = understanding();
-		final String sourceNamespace = understanding.getKey();
-		final String targetNamespace = understanding.getValue();
-
 		for (M entry : entries) {
-			target.put(entry.getName(sourceNamespace), entry.getName(targetNamespace));
+			target.put(entry.getName(SOURCE_NAMESPACE), entry.getName(TARGET_NAMESPACE));
 			if (entryConsumer != null) {
 				entryConsumer.accept(entry);
 			}
