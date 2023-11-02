@@ -1,7 +1,7 @@
 dependencies {
-    include "net.fabricmc:tiny-mappings-parser:0.3.0+build.17"
+    include libs.tinymappingsparser
 
-    compileOnly "cpw.mods:modlauncher:9.0.7"
+    compileOnly libs.modlauncher
 }
 
 shadowJar {
