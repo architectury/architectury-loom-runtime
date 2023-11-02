@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package dev.architectury.loom.forgeruntime.mixin;
+package dev.architectury.mixinremapperservice;
 
 import net.fabricmc.mapping.tree.TinyMappingFactory;
 import net.fabricmc.mapping.tree.TinyTree;
@@ -35,8 +35,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-public class ForgeLoomMixinRemapperInjectorServiceImpl {
-	private static final Logger LOGGER = LogManager.getLogger("ForgeLoomRemapperInjector");
+public class ArchitecturyMixinRemapperInjectorServiceImpl {
+	private static final Logger LOGGER = LogManager.getLogger("ArchitecturyRemapperInjector");
 
 	public static void attach() {
 		LOGGER.debug("We will be injecting our remapper.");

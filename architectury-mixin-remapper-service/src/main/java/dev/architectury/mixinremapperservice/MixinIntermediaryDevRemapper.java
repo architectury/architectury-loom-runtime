@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.architectury.loom.forgeruntime.mixin;
+package dev.architectury.mixinremapperservice;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
