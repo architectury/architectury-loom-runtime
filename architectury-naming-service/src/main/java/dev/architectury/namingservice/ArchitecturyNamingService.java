@@ -24,7 +24,9 @@
 package dev.architectury.namingservice;
 
 import cpw.mods.modlauncher.api.INameMappingService;
-import net.fabricmc.mapping.tree.*;
+import net.fabricmc.mappingio.MappingReader;
+import net.fabricmc.mappingio.tree.MappingTreeView;
+import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,7 +34,10 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -76,9 +81,9 @@ public class ArchitecturyNamingService implements INameMappingService {
 		sourceNamespace = getRequiredProperty(SOURCE_NAMESPACE_PROPERTY);
 		Path path = Paths.get(getRequiredProperty(MAPPINGS_PATH_PROPERTY));
 
-		TinyTree mappings;
+		MemoryMappingTree mappings = new MemoryMappingTree();
 		try (BufferedReader reader = Files.newBufferedReader(path)) {
-			mappings = TinyMappingFactory.loadWithDetection(reader);
+			MappingReader.read(reader, mappings);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -86,7 +91,8 @@ public class ArchitecturyNamingService implements INameMappingService {
 		classNameMappings = new HashMap<>();
 		fieldNameMappings = new HashMap<>();
 		methodNameMappings = new HashMap<>();
-		buildNameMap(mappings.getClasses(), classNameMappings, clz -> {
+		// The cast is to work around https://github.com/FabricMC/mapping-io/issues/14
+		buildNameMap(((MappingTreeView) mappings).getClasses(), classNameMappings, clz -> {
 			buildNameMap(clz.getMethods(), methodNameMappings, null);
 			buildNameMap(clz.getFields(), fieldNameMappings, null);
 		});
@@ -98,7 +104,7 @@ public class ArchitecturyNamingService implements INameMappingService {
 		return value;
 	}
 
-	private <M extends Mapped> void buildNameMap(Collection<M> entries, Map<String, String> target, Consumer<M> entryConsumer) {
+	private <M extends MappingTreeView.ElementMappingView> void buildNameMap(Collection<M> entries, Map<String, String> target, Consumer<M> entryConsumer) {
 		for (M entry : entries) {
 			target.put(entry.getName(sourceNamespace), entry.getName(TARGET_NAMESPACE));
 			if (entryConsumer != null) {

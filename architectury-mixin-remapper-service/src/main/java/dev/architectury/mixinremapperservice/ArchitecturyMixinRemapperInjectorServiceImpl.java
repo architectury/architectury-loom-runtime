@@ -23,14 +23,13 @@
 
 package dev.architectury.mixinremapperservice;
 
-import net.fabricmc.mapping.tree.TinyMappingFactory;
-import net.fabricmc.mapping.tree.TinyTree;
+import net.fabricmc.mappingio.MappingReader;
+import net.fabricmc.mappingio.tree.MappingTree;
+import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
-import java.io.BufferedReader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -53,14 +52,14 @@ public class ArchitecturyMixinRemapperInjectorServiceImpl {
 		}
 	}
 
-	private static TinyTree resolveMappings() {
+	private static MappingTree resolveMappings() {
 		try {
 			String mappingsPathProperty = System.getProperty(MAPPINGS_PATH_PROPERTY);
 			Path path = Paths.get(mappingsPathProperty);
 
-			try (BufferedReader reader = Files.newBufferedReader(path)) {
-				return TinyMappingFactory.loadWithDetection(reader);
-			}
+			MemoryMappingTree mappingTree = new MemoryMappingTree();
+			MappingReader.read(path, mappingTree);
+			return mappingTree;
 		} catch (Throwable throwable) {
 			throwable.printStackTrace();
 			return null;

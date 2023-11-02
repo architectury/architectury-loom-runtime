@@ -1,12 +1,11 @@
 dependencies {
-    include libs.tinymappingsparser
+    include libs.mappingio
 
     compileOnly libs.modlauncher
 }
 
 shadowJar {
-    relocate "net.fabricmc.mapping", "dev.architectury.namingservice.shadow.mapping"
-    relocate "net.fabricmc.mappings", "dev.architectury.namingservice.shadow.mappings"
+    relocate "net.fabricmc.mappingio", "dev.architectury.namingservice.shadow.mappingio"
 
     manifest {
         attributes 'Automatic-Module-Name': 'dev.architectury.namingservice'

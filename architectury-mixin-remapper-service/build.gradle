@@ -5,7 +5,7 @@ spotless {
 }
 
 dependencies {
-    include libs.tinymappingsparser
+    include libs.mappingio
 
     compileOnly libs.modlauncher
     compileOnly libs.mixin
@@ -15,8 +15,7 @@ dependencies {
 }
 
 shadowJar {
-    relocate "net.fabricmc.mapping", "dev.architectury.mixinremapperservice.shadow.mapping"
-    relocate "net.fabricmc.mappings", "dev.architectury.mixinremapperservice.shadow.mappings"
+    relocate "net.fabricmc.mappingio", "dev.architectury.mixinremapperservice.shadow.mappingio"
 
     manifest {
         attributes 'Automatic-Module-Name': 'dev.architectury.mixinremapperservice'
