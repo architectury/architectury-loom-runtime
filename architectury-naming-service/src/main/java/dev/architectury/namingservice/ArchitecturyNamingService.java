@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package dev.architectury.loom.forgeruntime;
+package dev.architectury.namingservice;
 
 import cpw.mods.modlauncher.api.INameMappingService;
 import net.fabricmc.mapping.tree.*;
@@ -36,7 +36,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-public class YarnNamingService implements INameMappingService {
+public class ArchitecturyNamingService implements INameMappingService {
 	// Namespaces in mapping file
 	private static final String TARGET_NAMESPACE = "named";
 
