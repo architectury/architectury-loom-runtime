@@ -1,0 +1,14 @@
+dependencies {
+    include "net.fabricmc:tiny-mappings-parser:0.3.0+build.17"
+
+    compileOnly "cpw.mods:modlauncher:9.0.7"
+}
+
+shadowJar {
+    relocate "net.fabricmc.mapping", "dev.architectury.namingservice.shadow.mapping"
+    relocate "net.fabricmc.mappings", "dev.architectury.namingservice.shadow.mappings"
+
+    manifest {
+        attributes 'Automatic-Module-Name': 'dev.architectury.namingservice'
+    }
+}

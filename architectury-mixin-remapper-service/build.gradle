@@ -1,0 +1,24 @@
+spotless {
+    java {
+        targetExclude '**/loom/forgeruntime/mixin/MixinIntermediaryDevRemapper.java'
+    }
+}
+
+dependencies {
+    include "net.fabricmc:tiny-mappings-parser:0.3.0+build.17"
+
+    compileOnly "cpw.mods:modlauncher:9.0.7"
+    compileOnly "org.spongepowered:mixin:0.8.2"
+    compileOnly "com.google.code.gson:gson:2.8.6"
+    compileOnly "com.google.guava:guava:21.0"
+    compileOnly "org.apache.logging.log4j:log4j-api:2.11.2"
+}
+
+shadowJar {
+    relocate "net.fabricmc.mapping", "dev.architectury.mixinremapperservice.shadow.mapping"
+    relocate "net.fabricmc.mappings", "dev.architectury.mixinremapperservice.shadow.mappings"
+
+    manifest {
+        attributes 'Automatic-Module-Name': 'dev.architectury.mixinremapperservice'
+    }
+}
