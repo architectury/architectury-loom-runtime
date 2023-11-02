@@ -50,7 +50,10 @@ subprojects {
         licenseHeaderFile rootProject.file("HEADER")
         newLine true
         property 'name', 'architectury'
-        property 'year', '2020, 2021'
+
+        extraConfig {
+            yearSeparator '-'
+        }
     }
 
     jar {

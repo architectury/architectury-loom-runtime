@@ -1,6 +1,6 @@
 spotless {
     java {
-        targetExclude '**/loom/forgeruntime/mixin/MixinIntermediaryDevRemapper.java'
+        targetExclude '**/mixin/MixinIntermediaryDevRemapper.java'
     }
 }
 
