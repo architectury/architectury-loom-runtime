@@ -38,11 +38,15 @@ import java.util.Objects;
 public class ArchitecturyMixinRemapperInjectorServiceImpl {
 	private static final Logger LOGGER = LogManager.getLogger("ArchitecturyRemapperInjector");
 
+	private static final String MAPPINGS_PATH_PROPERTY = "architectury.mixinRemapper.mappingsPath";
+	private static final String SOURCE_NAMESPACE_PROPERTY = "architectury.mixinRemapper.sourceNamespace";
+
 	public static void attach() {
 		LOGGER.debug("We will be injecting our remapper.");
 
 		try {
-			MixinEnvironment.getDefaultEnvironment().getRemappers().add(new MixinIntermediaryDevRemapper(Objects.requireNonNull(resolveMappings()), "intermediary", "named"));
+			String sourceNamespace = System.getProperty(SOURCE_NAMESPACE_PROPERTY);
+			MixinEnvironment.getDefaultEnvironment().getRemappers().add(new MixinIntermediaryDevRemapper(Objects.requireNonNull(resolveMappings()), sourceNamespace, "named"));
 			LOGGER.debug("We have successfully injected our remapper.");
 		} catch (Exception e) {
 			LOGGER.debug("We have failed to inject our remapper.", e);
@@ -51,8 +55,8 @@ public class ArchitecturyMixinRemapperInjectorServiceImpl {
 
 	private static TinyTree resolveMappings() {
 		try {
-			String srgNamedProperty = System.getProperty("mixin.forgeloom.inject.mappings.srg-named");
-			Path path = Paths.get(srgNamedProperty);
+			String mappingsPathProperty = System.getProperty(MAPPINGS_PATH_PROPERTY);
+			Path path = Paths.get(mappingsPathProperty);
 
 			try (BufferedReader reader = Files.newBufferedReader(path)) {
 				return TinyMappingFactory.loadWithDetection(reader);
