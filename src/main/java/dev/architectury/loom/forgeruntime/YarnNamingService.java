@@ -38,11 +38,12 @@ import java.util.function.Consumer;
 
 public class YarnNamingService implements INameMappingService {
 	// Namespaces in mapping file
-	private static final String SOURCE_NAMESPACE = "srg";
 	private static final String TARGET_NAMESPACE = "named";
 
-	private static final String PATH_TO_MAPPINGS = "fabric.yarnWithSrg.path";
+	private static final String MAPPINGS_PATH_PROPERTY = "architectury.naming.mappingsPath";
+	private static final String SOURCE_NAMESPACE_PROPERTY = "architectury.naming.sourceNamespace";
 
+	private String sourceNamespace;
 	private Map<String, String> classNameMappings = null;
 	private Map<String, String> methodNameMappings = null;
 	private Map<String, String> fieldNameMappings = null;
@@ -72,9 +73,8 @@ public class YarnNamingService implements INameMappingService {
 			return;
 		}
 
-		String pathStr = System.getProperty(PATH_TO_MAPPINGS);
-		if (pathStr == null) throw new RuntimeException("Missing system property '" + PATH_TO_MAPPINGS + "'!");
-		Path path = Paths.get(pathStr);
+		sourceNamespace = getRequiredProperty(SOURCE_NAMESPACE_PROPERTY);
+		Path path = Paths.get(getRequiredProperty(MAPPINGS_PATH_PROPERTY));
 
 		TinyTree mappings;
 		try (BufferedReader reader = Files.newBufferedReader(path)) {
@@ -92,9 +92,15 @@ public class YarnNamingService implements INameMappingService {
 		});
 	}
 
+	private static String getRequiredProperty(String property) {
+		final String value = System.getProperty(property);
+		if (value == null) throw new RuntimeException("Missing required system property '" + property + "'!");
+		return value;
+	}
+
 	private <M extends Mapped> void buildNameMap(Collection<M> entries, Map<String, String> target, Consumer<M> entryConsumer) {
 		for (M entry : entries) {
-			target.put(entry.getName(SOURCE_NAMESPACE), entry.getName(TARGET_NAMESPACE));
+			target.put(entry.getName(sourceNamespace), entry.getName(TARGET_NAMESPACE));
 			if (entryConsumer != null) {
 				entryConsumer.accept(entry);
 			}
