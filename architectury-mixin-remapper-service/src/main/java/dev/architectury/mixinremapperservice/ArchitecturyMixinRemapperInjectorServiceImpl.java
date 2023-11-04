@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of architectury-loom-runtime.
- * Copyright (c) 2020, 2021 architectury
+ * Copyright (c) 2021-2023 architectury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,42 +21,45 @@
  * SOFTWARE.
  */
 
-package dev.architectury.loom.forgeruntime.mixin;
+package dev.architectury.mixinremapperservice;
 
-import net.fabricmc.mapping.tree.TinyMappingFactory;
-import net.fabricmc.mapping.tree.TinyTree;
+import net.fabricmc.mappingio.MappingReader;
+import net.fabricmc.mappingio.tree.MappingTree;
+import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
-import java.io.BufferedReader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-public class ForgeLoomMixinRemapperInjectorServiceImpl {
-	private static final Logger LOGGER = LogManager.getLogger("ForgeLoomRemapperInjector");
+public class ArchitecturyMixinRemapperInjectorServiceImpl {
+	private static final Logger LOGGER = LogManager.getLogger("ArchitecturyRemapperInjector");
+
+	private static final String MAPPINGS_PATH_PROPERTY = "architectury.mixinRemapper.mappingsPath";
+	private static final String SOURCE_NAMESPACE_PROPERTY = "architectury.mixinRemapper.sourceNamespace";
 
 	public static void attach() {
 		LOGGER.debug("We will be injecting our remapper.");
 
 		try {
-			MixinEnvironment.getDefaultEnvironment().getRemappers().add(new MixinIntermediaryDevRemapper(Objects.requireNonNull(resolveMappings()), "intermediary", "named"));
+			String sourceNamespace = System.getProperty(SOURCE_NAMESPACE_PROPERTY);
+			MixinEnvironment.getDefaultEnvironment().getRemappers().add(new MixinIntermediaryDevRemapper(Objects.requireNonNull(resolveMappings()), sourceNamespace, "named"));
 			LOGGER.debug("We have successfully injected our remapper.");
 		} catch (Exception e) {
 			LOGGER.debug("We have failed to inject our remapper.", e);
 		}
 	}
 
-	private static TinyTree resolveMappings() {
+	private static MappingTree resolveMappings() {
 		try {
-			String srgNamedProperty = System.getProperty("mixin.forgeloom.inject.mappings.srg-named");
-			Path path = Paths.get(srgNamedProperty);
+			String mappingsPathProperty = System.getProperty(MAPPINGS_PATH_PROPERTY);
+			Path path = Paths.get(mappingsPathProperty);
 
-			try (BufferedReader reader = Files.newBufferedReader(path)) {
-				return TinyMappingFactory.loadWithDetection(reader);
-			}
+			MemoryMappingTree mappingTree = new MemoryMappingTree();
+			MappingReader.read(path, mappingTree);
+			return mappingTree;
 		} catch (Throwable throwable) {
 			throwable.printStackTrace();
 			return null;

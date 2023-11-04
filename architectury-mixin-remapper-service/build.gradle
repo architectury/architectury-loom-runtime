@@ -1,0 +1,23 @@
+spotless {
+    java {
+        targetExclude '**/mixin/MixinIntermediaryDevRemapper.java'
+    }
+}
+
+dependencies {
+    include libs.mappingio
+
+    compileOnly libs.modlauncher
+    compileOnly libs.mixin
+    compileOnly libs.gson
+    compileOnly libs.guava
+    compileOnly libs.log4j.api
+}
+
+shadowJar {
+    relocate "net.fabricmc.mappingio", "dev.architectury.mixinremapperservice.shadow.mappingio"
+
+    manifest {
+        attributes 'Automatic-Module-Name': 'dev.architectury.mixinremapperservice'
+    }
+}

@@ -1,2 +1,5 @@
 rootProject.name = "architectury-loom-runtime"
 
+include 'architectury-mixin-remapper-service'
+include 'architectury-naming-service'
+include 'mcp-annotations'

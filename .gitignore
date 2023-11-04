@@ -1,10 +1,10 @@
 # Compiled nonsense that does not belong in *source* control
-/build
-/bin
-/.gradle
-/out
-/classes
-/old
+build/
+bin/
+.gradle/
+out/
+classes/
+old/
 
 # IDE nonsense that could go in source control but really shouldn't
 .classpath

@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of architectury-loom-runtime.
- * Copyright (c) 2020, 2021 architectury
+ * Copyright (c) 2020-2023 architectury
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,10 +21,12 @@
  * SOFTWARE.
  */
 
-package dev.architectury.loom.forgeruntime;
+package dev.architectury.namingservice;
 
 import cpw.mods.modlauncher.api.INameMappingService;
-import net.fabricmc.mapping.tree.*;
+import net.fabricmc.mappingio.MappingReader;
+import net.fabricmc.mappingio.tree.MappingTreeView;
+import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,17 +34,21 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-public class YarnNamingService implements INameMappingService {
+public class ArchitecturyNamingService implements INameMappingService {
 	// Namespaces in mapping file
-	private static final String SOURCE_NAMESPACE = "srg";
 	private static final String TARGET_NAMESPACE = "named";
 
-	private static final String PATH_TO_MAPPINGS = "fabric.yarnWithSrg.path";
+	private static final String MAPPINGS_PATH_PROPERTY = "architectury.naming.mappingsPath";
+	private static final String SOURCE_NAMESPACE_PROPERTY = "architectury.naming.sourceNamespace";
 
+	private String sourceNamespace;
 	private Map<String, String> classNameMappings = null;
 	private Map<String, String> methodNameMappings = null;
 	private Map<String, String> fieldNameMappings = null;
@@ -72,13 +78,12 @@ public class YarnNamingService implements INameMappingService {
 			return;
 		}
 
-		String pathStr = System.getProperty(PATH_TO_MAPPINGS);
-		if (pathStr == null) throw new RuntimeException("Missing system property '" + PATH_TO_MAPPINGS + "'!");
-		Path path = Paths.get(pathStr);
+		sourceNamespace = getRequiredProperty(SOURCE_NAMESPACE_PROPERTY);
+		Path path = Paths.get(getRequiredProperty(MAPPINGS_PATH_PROPERTY));
 
-		TinyTree mappings;
+		MemoryMappingTree mappings = new MemoryMappingTree();
 		try (BufferedReader reader = Files.newBufferedReader(path)) {
-			mappings = TinyMappingFactory.loadWithDetection(reader);
+			MappingReader.read(reader, mappings);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -86,15 +91,22 @@ public class YarnNamingService implements INameMappingService {
 		classNameMappings = new HashMap<>();
 		fieldNameMappings = new HashMap<>();
 		methodNameMappings = new HashMap<>();
-		buildNameMap(mappings.getClasses(), classNameMappings, clz -> {
+		// The cast is to work around https://github.com/FabricMC/mapping-io/issues/14
+		buildNameMap(((MappingTreeView) mappings).getClasses(), classNameMappings, clz -> {
 			buildNameMap(clz.getMethods(), methodNameMappings, null);
 			buildNameMap(clz.getFields(), fieldNameMappings, null);
 		});
 	}
 
-	private <M extends Mapped> void buildNameMap(Collection<M> entries, Map<String, String> target, Consumer<M> entryConsumer) {
+	private static String getRequiredProperty(String property) {
+		final String value = System.getProperty(property);
+		if (value == null) throw new RuntimeException("Missing required system property '" + property + "'!");
+		return value;
+	}
+
+	private <M extends MappingTreeView.ElementMappingView> void buildNameMap(Collection<M> entries, Map<String, String> target, Consumer<M> entryConsumer) {
 		for (M entry : entries) {
-			target.put(entry.getName(SOURCE_NAMESPACE), entry.getName(TARGET_NAMESPACE));
+			target.put(entry.getName(sourceNamespace), entry.getName(TARGET_NAMESPACE));
 			if (entryConsumer != null) {
 				entryConsumer.accept(entry);
 			}

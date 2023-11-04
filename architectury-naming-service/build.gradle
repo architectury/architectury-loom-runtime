@@ -1,0 +1,13 @@
+dependencies {
+    include libs.mappingio
+
+    compileOnly libs.modlauncher
+}
+
+shadowJar {
+    relocate "net.fabricmc.mappingio", "dev.architectury.namingservice.shadow.mappingio"
+
+    manifest {
+        attributes 'Automatic-Module-Name': 'dev.architectury.namingservice'
+    }
+}

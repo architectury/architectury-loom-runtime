@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.architectury.loom.forgeruntime.mixin;
+package dev.architectury.mixinremapperservice;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -24,12 +24,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import net.fabricmc.mappingio.tree.MappingTreeView;
 import org.spongepowered.asm.mixin.transformer.ClassInfo;
-
-import net.fabricmc.mapping.tree.ClassDef;
-import net.fabricmc.mapping.tree.Descriptored;
-import net.fabricmc.mapping.tree.TinyTree;
-import net.fabricmc.mapping.util.MixinRemapper;
 
 public class MixinIntermediaryDevRemapper extends MixinRemapper {
 	private static final String ambiguousName = "<ambiguous>"; // dummy value for ambiguous mappings - needs querying with additional owner and/or desc info
@@ -40,10 +36,10 @@ public class MixinIntermediaryDevRemapper extends MixinRemapper {
 	private final Map<String, String> nameDescFieldLookup = new HashMap<>();
 	private final Map<String, String> nameDescMethodLookup = new HashMap<>();
 
-	public MixinIntermediaryDevRemapper(TinyTree mappings, String from, String to) {
+	public MixinIntermediaryDevRemapper(MappingTreeView mappings, String from, String to) {
 		super(mappings, from, to);
 
-		for (ClassDef classDef : mappings.getClasses()) {
+		for (MappingTreeView.ClassMappingView classDef : mappings.getClasses()) {
 			allPossibleClassNames.add(classDef.getName(from));
 			allPossibleClassNames.add(classDef.getName(to));
 
@@ -52,10 +48,10 @@ public class MixinIntermediaryDevRemapper extends MixinRemapper {
 		}
 	}
 
-	private <T extends Descriptored> void putMemberInLookup(String from, String to, Collection<T> descriptored, Map<String, String> nameMap, Map<String, String> nameDescMap) {
+	private <T extends MappingTreeView.MemberMappingView> void putMemberInLookup(String from, String to, Collection<T> descriptored, Map<String, String> nameMap, Map<String, String> nameDescMap) {
 		for (T field : descriptored) {
 			String nameFrom = field.getName(from);
-			String descFrom = field.getDescriptor(from);
+			String descFrom = field.getDesc(from);
 			String nameTo = field.getName(to);
 
 			String prev = nameMap.putIfAbsent(nameFrom, nameTo);

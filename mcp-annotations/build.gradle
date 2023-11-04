@@ -1,0 +1,5 @@
+shadowJar {
+    manifest {
+        attributes 'Automatic-Module-Name': 'dev.architectury.mcpannotations'
+    }
+}
