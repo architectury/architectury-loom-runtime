@@ -1,0 +1,19 @@
+dependencies {
+    include libs.mappingio
+
+    compileOnly libs.asm
+    compileOnly libs.asm.analysis
+    compileOnly libs.asm.commons
+    compileOnly libs.asm.tree
+    compileOnly libs.asm.util
+
+    compileOnly libs.modlauncher
+}
+
+shadowJar {
+    relocate "net.fabricmc.mappingio", "dev.architectury.reflectionredirector.shadow.mappingio"
+
+    manifest {
+        attributes 'Automatic-Module-Name': 'dev.architectury.reflectionredirector'
+    }
+}

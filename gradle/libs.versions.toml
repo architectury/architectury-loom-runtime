@@ -1,4 +1,5 @@
 [versions]
+asm = "9.5"
 mapping-io = "0.4.2"
 modlauncher = "9.0.7"
 mixin = "0.8.2"
@@ -7,6 +8,11 @@ guava = "21.0"
 log4j-api = "2.11.2"
 
 [libraries]
+asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
+asm-analysis = { module = "org.ow2.asm:asm-analysis", version.ref = "asm" }
+asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
+asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
+asm-util = { module = "org.ow2.asm:asm-util", version.ref = "asm" }
 mappingio = { module = "net.fabricmc:mapping-io", version.ref = "mapping-io" }
 modlauncher = { module = "cpw.mods:modlauncher", version.ref = "modlauncher" }
 mixin = { module = "org.spongepowered:mixin", version.ref = "mixin" }
