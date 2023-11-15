@@ -11,7 +11,7 @@ dependencies {
 }
 
 shadowJar {
-    relocate "net.fabricmc.mappingio", "dev.architectury.namingservice.shadow.mappingio"
+    relocate "net.fabricmc.mappingio", "dev.architectury.reflectionredirector.shadow.mappingio"
 
     manifest {
         attributes 'Automatic-Module-Name': 'dev.architectury.reflectionredirector'

@@ -44,8 +44,8 @@ public class ArchitecturyReflectionRedirectorPlugin implements ILaunchPluginServ
     // Namespaces in mapping file
     private static final String TARGET_NAMESPACE = "named";
 
-    private static final String MAPPINGS_PATH_PROPERTY = "architectury.naming.mappingsPath";
-    private static final String SOURCE_NAMESPACE_PROPERTY = "architectury.naming.sourceNamespace";
+    private static final String MAPPINGS_PATH_PROPERTY = "architectury.reflectionredirector.mappingsPath";
+    private static final String SOURCE_NAMESPACE_PROPERTY = "architectury.reflectionredirector.sourceNamespace";
 
     private String sourceNamespace;
     private MappingTree mappings;
@@ -71,7 +71,13 @@ public class ArchitecturyReflectionRedirectorPlugin implements ILaunchPluginServ
     @Override
     public boolean processClass(Phase phase, ClassNode classNode, Type classType) {
         ReflectionRedirector.redirect(classNode);
-        return false; // We don't need to rewrite frames
+        return true; // We don't need to rewrite frames
+    }
+
+    @Override
+    public int processClassWithFlags(Phase phase, ClassNode classNode, Type classType, String reason) {
+        processClass(phase, classNode, classType);
+        return ComputeFlags.SIMPLE_REWRITE;
     }
 
     private void generateMappings() {
@@ -112,10 +118,10 @@ public class ArchitecturyReflectionRedirectorPlugin implements ILaunchPluginServ
         // ensure the mapping tables are built
         generateMappings();
 
-        String searchName = maybeReplace(name.contains("."), name, '.', '/');
-        MappingTree.ClassMapping clazz = this.mappings.getClass(searchName, this.mappings.getNamespaceId(sourceNamespace));
+        String searchName = maybeReplace(owner.contains("."), owner, '.', '/');
+        MappingTree.ClassMapping clazz = this.mappings.getClass(searchName, this.mappings.getNamespaceId(TARGET_NAMESPACE));
         if (clazz == null) return name;
-        MappingTree.MethodMapping method = clazz.getMethod(name, desc, this.mappings.getNamespaceId(sourceNamespace));
+        MappingTree.MethodMapping method = clazz.getMethod(name, this.mappings.mapDesc(desc, this.mappings.getNamespaceId(TARGET_NAMESPACE), this.mappings.getNamespaceId(sourceNamespace)), this.mappings.getNamespaceId(sourceNamespace));
         if (method == null) return name;
         String target = method.getName(TARGET_NAMESPACE);
         return target != null ? target : name;
@@ -125,8 +131,8 @@ public class ArchitecturyReflectionRedirectorPlugin implements ILaunchPluginServ
         // ensure the mapping tables are built
         generateMappings();
 
-        String searchName = maybeReplace(name.contains("."), name, '.', '/');
-        MappingTree.ClassMapping clazz = this.mappings.getClass(searchName, this.mappings.getNamespaceId(sourceNamespace));
+        String searchName = maybeReplace(owner.contains("."), owner, '.', '/');
+        MappingTree.ClassMapping clazz = this.mappings.getClass(searchName, this.mappings.getNamespaceId(TARGET_NAMESPACE));
         if (clazz == null) return name;
         MappingTree.FieldMapping field = clazz.getField(name, null, this.mappings.getNamespaceId(sourceNamespace));
         if (field == null) return name;

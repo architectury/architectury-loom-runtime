@@ -24,7 +24,6 @@
 package dev.architectury.reflectionredirector.runtime;
 
 import dev.architectury.reflectionredirector.ArchitecturyReflectionRedirectorPlugin;
-import jdk.internal.reflect.Reflection;
 import org.objectweb.asm.Type;
 
 import java.lang.reflect.Field;
@@ -32,8 +31,8 @@ import java.lang.reflect.Method;
 
 public class ArchitecturyReflectionRuntime {
     public static Class<?> forName(String name) throws ClassNotFoundException {
-        Class<?> caller = Reflection.getCallerClass();
-        return forName(name, true, getClassLoader(caller));
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        return forName(name, true, loader);
     }
 
     public static Class<?> forName(String name, boolean initialize, ClassLoader classLoader) throws ClassNotFoundException {
@@ -43,7 +42,9 @@ public class ArchitecturyReflectionRuntime {
             return Class.forName(name, initialize, classLoader);
         } else {
             try {
-                return Class.forName(remapped, initialize, classLoader);
+                Class<?> clazz = Class.forName(remapped, initialize, classLoader);
+                System.out.println("Architectury RR: Remapped " + name + " to " + remapped);
+                return clazz;
             } catch (ClassNotFoundException e) {
                 return Class.forName(name, initialize, classLoader);
             }
@@ -65,7 +66,9 @@ public class ArchitecturyReflectionRuntime {
             return clazz.getDeclaredMethod(name, parameterTypes);
         } else {
             try {
-                return clazz.getDeclaredMethod(remapped, parameterTypes);
+                Method method = clazz.getDeclaredMethod(remapped, parameterTypes);
+                System.out.println("Architectury RR: Remapped " + name + strBuilder + " to " + remapped);
+                return method;
             } catch (NoSuchMethodException e) {
                 return clazz.getDeclaredMethod(name, parameterTypes);
             }
@@ -99,7 +102,9 @@ public class ArchitecturyReflectionRuntime {
             return clazz.getDeclaredField(name);
         } else {
             try {
-                return clazz.getDeclaredField(remapped);
+                Field field = clazz.getDeclaredField(remapped);
+                System.out.println("Architectury RR: Remapped " + name + " to " + remapped);
+                return field;
             } catch (NoSuchFieldException e) {
                 return clazz.getDeclaredField(name);
             }
