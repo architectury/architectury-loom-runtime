@@ -42,9 +42,7 @@ public class ArchitecturyReflectionRuntime {
             return Class.forName(name, initialize, classLoader);
         } else {
             try {
-                Class<?> clazz = Class.forName(remapped, initialize, classLoader);
-                System.out.println("Architectury RR: Remapped " + name + " to " + remapped);
-                return clazz;
+                return Class.forName(remapped, initialize, classLoader);
             } catch (ClassNotFoundException e) {
                 return Class.forName(name, initialize, classLoader);
             }
@@ -66,9 +64,7 @@ public class ArchitecturyReflectionRuntime {
             return clazz.getDeclaredMethod(name, parameterTypes);
         } else {
             try {
-                Method method = clazz.getDeclaredMethod(remapped, parameterTypes);
-                System.out.println("Architectury RR: Remapped " + name + strBuilder + " to " + remapped);
-                return method;
+                return clazz.getDeclaredMethod(remapped, parameterTypes);
             } catch (NoSuchMethodException e) {
                 return clazz.getDeclaredMethod(name, parameterTypes);
             }
@@ -102,9 +98,7 @@ public class ArchitecturyReflectionRuntime {
             return clazz.getDeclaredField(name);
         } else {
             try {
-                Field field = clazz.getDeclaredField(remapped);
-                System.out.println("Architectury RR: Remapped " + name + " to " + remapped);
-                return field;
+                return clazz.getDeclaredField(remapped);
             } catch (NoSuchFieldException e) {
                 return clazz.getDeclaredField(name);
             }
