@@ -44,8 +44,8 @@ public class ArchitecturyReflectionRedirectorPlugin implements ILaunchPluginServ
     // Namespaces in mapping file
     private static final String TARGET_NAMESPACE = "named";
 
-    private static final String MAPPINGS_PATH_PROPERTY = "architectury.reflectionredirector.mappingsPath";
-    private static final String SOURCE_NAMESPACE_PROPERTY = "architectury.reflectionredirector.sourceNamespace";
+    private static final String MAPPINGS_PATH_PROPERTY = "architectury.reflectionRedirector.mappingsPath";
+    private static final String SOURCE_NAMESPACE_PROPERTY = "architectury.reflectionRedirector.sourceNamespace";
 
     private String sourceNamespace;
     private MappingTree mappings;
